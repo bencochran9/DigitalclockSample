@@ -91,8 +91,14 @@ public class DigitalClock extends Application {
         private Calendar calendar = Calendar.getInstance();
         private Digit[] digits;
         private Timeline delayTimeline, secondTimeline;
+        private Circle pmDot;
+        private Color savedOnColor;
+        private Color savedOffColor;
 
         public Clock(Color onColor, Color offColor) {
+            savedOnColor = onColor;
+            savedOffColor = offColor;
+            
             // create effect for on LEDs
             Glow onEffect = new Glow(1.7f);
             onEffect.setInput(new InnerShadow());
@@ -110,11 +116,13 @@ public class DigitalClock extends Application {
                 getChildren().add(digit);
             }
             // create dots
+            pmDot = new Circle((80 * 5) + 54 + 17, 44, 6,  offColor);
             Group dots = new Group(
                     new Circle(80 + 54 + 20, 44, 6, onColor),
                     new Circle(80 + 54 + 17, 64, 6, onColor),
                     new Circle((80 * 3) + 54 + 20, 44, 6, onColor),
-                    new Circle((80 * 3) + 54 + 17, 64, 6, onColor));
+                    new Circle((80 * 3) + 54 + 17, 64, 6, onColor),
+                    pmDot);
             dots.setEffect(onDotEffect);
             getChildren().add(dots);
             // update digits to current time and start timer to update every second
@@ -124,7 +132,9 @@ public class DigitalClock extends Application {
 
         private void refreshClocks() {
             calendar.setTimeInMillis(System.currentTimeMillis());
-            int hours = calendar.get(Calendar.HOUR_OF_DAY);
+            //int hours24 = calendar.get(Calendar.HOUR_OF_DAY);
+            int hours = calendar.get(Calendar.HOUR);
+            int pm = calendar.get(Calendar.PM);
             int minutes = calendar.get(Calendar.MINUTE);
             int seconds = calendar.get(Calendar.SECOND);
             digits[0].showNumber(hours / 10);
@@ -133,6 +143,9 @@ public class DigitalClock extends Application {
             digits[3].showNumber(minutes % 10);
             digits[4].showNumber(seconds / 10);
             digits[5].showNumber(seconds % 10);
+            
+            // Show PM dot if needed
+            pmDot.setFill( pm > 0 ? savedOnColor : savedOffColor );
         }
 
         public void play() {
